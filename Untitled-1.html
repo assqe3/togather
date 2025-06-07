@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة رسم تشاركية</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #f5f5f5;
+    }
+
+    canvas {
+      display: block;
+      background: white;
+      border: 2px solid #ccc;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      touch-action: none;
+    }
+
+    #tools {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      z-index: 10;
+    }
+
+    #tools input[type="color"],
+    #tools input[type="range"] {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="tools">
+    <label>اللون:
+      <input type="color" id="colorPicker" value="#000000" />
+    </label>
+    <label>السُمك:
+      <input type="range" id="brushSize" min="1" max="20" value="4" />
+    </label>
+    <button onclick="clearCanvas()">مسح الكل</button>
+  </div>
+
+  <canvas id="drawCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('drawCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const brushSize = document.getElementById('brushSize');
+
+    // اضبط حجم اللوحة
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mousemove', draw);
+
+    canvas.addEventListener('touchstart', (e) => startDraw(e.touches[0]));
+    canvas.addEventListener('touchend', stopDraw);
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      draw(e.touches[0]);
+    });
+
+    function startDraw(e) {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.clientX, e.clientY);
+    }
+
+    function stopDraw() {
+      drawing = false;
+      ctx.closePath();
+    }
+
+    function draw(e) {
+      if (!drawing) return;
+      ctx.lineTo(e.clientX, e.clientY);
+      ctx.strokeStyle = colorPicker.value;
+      ctx.lineWidth = brushSize.value;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  </script>
+</body>
+</html>
